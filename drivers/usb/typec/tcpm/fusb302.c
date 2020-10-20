@@ -9,6 +9,7 @@
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/extcon.h>
+#include <linux/extcon-provider.h>
 #include <linux/gpio/consumer.h>
 #include <linux/i2c.h>
 #include <linux/interrupt.h>
@@ -67,6 +68,19 @@ static const u8 rd_mda_value[] = {
 	[SRC_CURRENT_HIGH] = 61,	/* 2604mV */
 };
 
+// TODO: read connector extcon-cables
+static const unsigned int fusb302_extcon_cable[] = {
+	EXTCON_USB, // 1
+	EXTCON_USB_HOST, // 2
+	EXTCON_CHG_USB_SDP, // 5
+	EXTCON_CHG_USB_DCP, // 6
+	EXTCON_CHG_USB_FAST, // 9
+	EXTCON_CHG_USB_SLOW, // 10
+	EXTCON_CHG_USB_PD, // 12
+	EXTCON_DISP_DP, // 44
+	EXTCON_NONE
+};
+
 #define LOG_BUFFER_ENTRIES	1024
 #define LOG_BUFFER_ENTRY_SIZE	128
 
@@ -85,6 +99,7 @@ struct fusb302_chip {
 	struct gpio_desc *gpio_int_n;
 	int gpio_int_n_irq;
 	struct extcon_dev *extcon;
+	bool extcon_self;
 
 	struct workqueue_struct *wq;
 	struct delayed_work bc_lvl_handler;
@@ -1701,6 +1716,21 @@ static int fusb302_probe(struct i2c_client *client,
 		chip->extcon = extcon_get_extcon_dev(name);
 		if (!chip->extcon)
 			return -EPROBE_DEFER;
+	} else {
+		/* Initialize extcon device */
+		chip->extcon = devm_extcon_dev_allocate(dev,
+						fusb302_extcon_cable);
+
+		if (IS_ERR(chip->extcon))
+			return -ENOMEM;
+
+		ret = devm_extcon_dev_register(chip->dev, chip->extcon);
+		if (ret) {
+			dev_err(chip->dev, "failed to register extcon device\n");
+			return ret;
+		}
+
+		chip->extcon_self = true;
 	}
 
 	chip->vbus = devm_regulator_get(chip->dev, "vbus");
