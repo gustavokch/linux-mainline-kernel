@@ -1,5 +1,7 @@
-on: [push]
-
+on:
+  push:
+    branches: 
+      - 'release-6.2'
 env:
   RELEASE_START: 1170 # 1150, as this is latest build by GitLab CI
   CCACHE_DIR: $RUNNER_TEMP/ccache
