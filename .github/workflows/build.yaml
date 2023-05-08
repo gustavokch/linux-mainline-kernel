@@ -25,41 +25,4 @@ jobs:
       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         ./dev-make kernel-package
-    - name: Release package
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        set -x
-
-        export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
-        export RELEASE_NAME="$(./dev-make version)"
-        export RELEASE_TITLE="$(./dev-make version)"
-        export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-
-        github-release release \
-          --tag "${RELEASE_NAME}" \
-          --name "${RELEASE_TITLE}" \
-          --user "${GITHUB_REPOSITORY%/*}" \
-          --repo "${GITHUB_REPOSITORY#*/}" \
-          --description "${DESCRIPTION}" \
-          --target "${GITHUB_SHA}" \
-          --draft
-
-        sleep 3s # allow to update release
-
-        for i in ../*$(./dev-make info)*.deb; do
-          github-release upload \
-            --tag "${RELEASE_NAME}" \
-            --name "$(basename "${i}")" \
-            --user "${GITHUB_REPOSITORY%/*}" \
-            --repo "${GITHUB_REPOSITORY#*/}" \
-            --file "${i}"
-        done
-
-        github-release edit \
-          --tag "${RELEASE_NAME}" \
-          --name "${RELEASE_TITLE}" \
-          --user "${GITHUB_REPOSITORY%/*}" \
-          --repo "${GITHUB_REPOSITORY#*/}" \
-          --description "${DESCRIPTION}"
 
