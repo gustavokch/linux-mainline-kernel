@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions: write-all
-    container: ayufan/rock64-dockerfiles:x86_64
+    container: gustavokch/rock64build:jammy
     steps:
     - name: Checkout
       uses: actions/checkout@v3
