@@ -3,8 +3,8 @@ on:
     branches: 
       - 'release-6.2'
          
-permissions:
-contents: write
+permissions: write-all
+
 
 env:
   RELEASE_START: 1170 # 1150, as this is latest build by GitLab CI
