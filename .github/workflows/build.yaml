@@ -11,7 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions: write-all
-    container: gustavokch/rock64build:jammy
+    container: 
+      image: gustavokch/rock64build:jammy
+      credentials:
+        username: gustavokch
+        password: dckr_pat_HzZm-FaY8cD_h88RZoEfhWTyC9A
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -40,7 +44,7 @@ jobs:
           
     - name: Release package
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: "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"
       run: |
         set -x
 
