@@ -28,7 +28,7 @@ jobs:
 
    - name: Release package
       env:
-        GITHUB_TOKEN: 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
+        GITHUB_TOKEN: "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"
       run: |
         set -x
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
