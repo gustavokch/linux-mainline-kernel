@@ -35,12 +35,12 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
           name: .deb output
-          path: ../*$(./dev-make info)*.deb
+          path: *$(./dev-make info)*.deb
     - name: Archive production artifacts2
       uses: actions/upload-artifact@v3
       with:
           name: debian
-          path: ./*$(./dev-make info)*.deb
+          path: /*$(./dev-make info)*.deb
           
     - name: Release package
       env:
