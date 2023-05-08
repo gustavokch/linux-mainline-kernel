@@ -2,6 +2,10 @@ on:
   push:
     branches: 
       - 'release-6.2'
+         
+permissions:
+contents: write
+
 env:
   RELEASE_START: 1170 # 1150, as this is latest build by GitLab CI
   CCACHE_DIR: $RUNNER_TEMP/ccache
@@ -27,8 +31,9 @@ jobs:
         ./dev-make kernel-package
 
    - name: Release package
+
       env:
-        GITHUB_TOKEN: "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"
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         set -x
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
