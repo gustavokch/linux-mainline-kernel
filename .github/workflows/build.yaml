@@ -35,7 +35,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
           name: .deb output
-          path: *$(./dev-make info)*.deb
+          path: /__w/linux-mainline-kernel/linux-mainline-kernel/*$(./dev-make info)*.deb
     - name: Archive production artifacts2
       uses: actions/upload-artifact@v3
       with:
