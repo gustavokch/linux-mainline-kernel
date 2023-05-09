@@ -40,4 +40,7 @@ jobs:
         export RELEASE_NAME="$(./dev-make version)"
         export RELEASE_TITLE="$(./dev-make version)"
         export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-        gh release create -t $RELEASE_NAME --generate-notes --repo $RELEASE_TITLE https://github.com/gustavokch/linux-mainline-kernel $RELEASE ../*.deb
+        find / -type f -name "*.deb" > deb
+        export DEB=$(cat deb)
+        gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE_TITLE $DEB
+        
