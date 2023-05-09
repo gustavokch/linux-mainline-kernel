@@ -31,6 +31,9 @@ jobs:
       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
     - name: Release package
+      env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       TOKEN: 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
       run: |
         wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-headers-6.2.0-1185-ayufan-g_6.2.0-1185-ayufan_arm64.deb
         wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-image-6.2.0-1185-ayufan-g_6.2.0-1185-ayufan_arm64.deb
@@ -46,7 +49,7 @@ jobs:
         echo $RELEASE_NAME
         echo $GH_TOKEN
         echo $GITHUB_TOKEN
-        export TOKEN=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
         echo $TOKEN > token
         gh auth login --with-token < token
+        gh auth login --with-token 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
         gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE_TITLE $DEB
