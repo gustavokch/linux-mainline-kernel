@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     container: 
-      image: gustavokch/rock64build:jammy
+      image: gustavokch/rock64build-release:latest
       credentials:
         username: gustavokch
         password: dckr_pat_HzZm-FaY8cD_h88RZoEfhWTyC9A
@@ -31,14 +31,13 @@ jobs:
       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         ./dev-make kernel-package
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v3
-      with:
-          name: .deb output
-          path: /__w/linux-mainline-kernel/linux-mainline-kernel/*.deb
-    - name: Archive production artifacts2
-      uses: actions/upload-artifact@v3
-      with:
-          name: debian
-          path: /*.deb
-          
+        
+    - name: Release package
+      run: |
+        export GH_TOKEN="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"
+        export RELEASE_START="1185"
+        export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
+        export RELEASE_NAME="$(./dev-make version)"
+        export RELEASE_TITLE="$(./dev-make version)"
+        export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        gh release create -t $RELEASE_NAME --generate-notes --repo $RELEASE_TITLE https://github.com/gustavokch/linux-mainline-kernel $RELEASE ../*.deb
