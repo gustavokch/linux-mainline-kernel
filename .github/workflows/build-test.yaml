@@ -47,6 +47,9 @@ jobs:
         echo $RELEASE_TITLE
         echo $RELEASE_NAME
         echo $GITHUB_TOKEN > token
-        export $GITHUB_TOKEN=
+        
+    - name: release to github
+      run: |
         gh auth login --with-token < token
-        gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE_TITLE $DEB
+        gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE $DEB
+    
