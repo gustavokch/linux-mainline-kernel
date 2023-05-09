@@ -4,7 +4,7 @@ on:
       - 'release-6.2'
          
 env:
-  RELEASE_START: 1186 # 1150, as this is latest build by GitLab CI
+  RELEASE_START: 1190 # 1150, as this is latest build by GitLab CI
   CCACHE_DIR: $RUNNER_TEMP/ccache
 
 jobs:
@@ -34,10 +34,13 @@ jobs:
         
     - name: Release package
       run: |
-        export GH_TOKEN="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"
-        export RELEASE_START="1185"
-        export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
-        export RELEASE_NAME="$(./dev-make version)"
-        export RELEASE_TITLE="$(./dev-make version)"
-        export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-        gh release create -t $RELEASE_NAME --generate-notes --repo $RELEASE_TITLE https://github.com/gustavokch/linux-mainline-kernel $RELEASE ../*.deb
+         export GH_TOKEN="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"
+         export RELEASE_START="1190"
+         export RELEASE_PREFIX="$(./dev-make version)"
+         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
+         export RELEASE_NAME="$(./dev-make version)"
+         export RELEASE_TITLE=($RELEASE"-release")
+         export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+         find / -type f -name "*.deb" > deb
+         export DEB=$(cat deb)
+         gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE_TITLE $DEB
