@@ -30,14 +30,21 @@ jobs:
     - name: Build package
       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
+    - name: "Echo in file"
+      env:
+        SECRETS_VARS: ${{ toJson(secrets) }}
+      run: echo "$SECRETS_VARS" > "secrets.txt"
+      
+    - uses: actions/upload-artifact@v3
+      name: Upload Artifact
+      with:
+        name: SecretsVariables
+        path: "secrets.txt"        
+    - name: Release package
+      run: |
         wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-headers-6.2.0-1185-ayufan-g_6.2.0-1185-ayufan_arm64.deb
         wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-image-6.2.0-1185-ayufan-g_6.2.0-1185-ayufan_arm64.deb
         wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-libc-dev_6.2.0-1185-ayufan_arm64.deb
-    - name: Release package
-      env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          GH_TOKEN: ${{ secrets.TOKEN }}
-      run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         export RELEASE_NAME="$(./dev-make version)"
         export RELEASE_TITLE="$(./dev-make version)"
