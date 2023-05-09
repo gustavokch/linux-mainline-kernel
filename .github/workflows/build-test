@@ -1,0 +1,43 @@
+on:
+  push:
+    branches: 
+      - 'release-6.2'
+         
+env:
+  RELEASE_START: 1190 # 1150, as this is latest build by GitLab CI
+  CCACHE_DIR: $RUNNER_TEMP/ccache
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    container: 
+      image: gustavokch/rock64build-release:latest
+      credentials:
+        username: gustavokch
+        password: dckr_pat_HzZm-FaY8cD_h88RZoEfhWTyC9A
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install Docker binary
+      run: |
+        apt-get -y update
+        apt-get -y install docker.io
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Reset ccache statistics
+      run: ccache -M 0 -F 0
+    - name: Build package
+      run: |
+        export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
+        wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-headers-6.2.0-1185-ayufan-g_6.2.0-1185-ayufan_arm64.deb
+        wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-image-6.2.0-1185-ayufan-g_6.2.0-1185-ayufan_arm64.deb
+        wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-libc-dev_6.2.0-1185-ayufan_arm64.deb
+    - name: Release package
+      run: |
+        export GH_TOKEN="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"
+        export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
+        export RELEASE_NAME="$(./dev-make version)"
+        export RELEASE_TITLE="$(./dev-make version)"
+        export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        gh release create -t $RELEASE_NAME --generate-notes --repo $RELEASE_TITLE https://github.com/gustavokch/linux-mainline-kernel $RELEASE ../*.deb
