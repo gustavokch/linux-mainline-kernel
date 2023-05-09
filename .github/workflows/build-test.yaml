@@ -38,7 +38,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GH_TOKEN: ${{ secrets.TOKEN }}
       run: |
-        export GH_TOKEN="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"
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         export RELEASE_NAME="$(./dev-make version)"
         export RELEASE_TITLE="$(./dev-make version)"
