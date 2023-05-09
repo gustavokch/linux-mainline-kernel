@@ -34,6 +34,9 @@ jobs:
         wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-image-6.2.0-1185-ayufan-g_6.2.0-1185-ayufan_arm64.deb
         wget https://github.com/gustavokch/linux-mainline-kernel/releases/download/6.2.0-1190-rock64-ayufan-release/linux-libc-dev_6.2.0-1185-ayufan_arm64.deb
     - name: Release package
+      env:
+         GH_TOKEN: ${{ secrets.TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.TOKEN }}
       run: |
         export GH_TOKEN="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"
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
