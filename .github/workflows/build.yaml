@@ -43,7 +43,7 @@ jobs:
     - name: Release package
       env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       run: |
+      run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         export RELEASE_NAME="$(./dev-make version)"
         export RELEASE_TITLE="$(./dev-make version)"
