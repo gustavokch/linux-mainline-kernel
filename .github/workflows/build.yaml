@@ -29,7 +29,7 @@ jobs:
       run: ccache -M 0 -F 0
     - name: Build package
       run: |
-        sudo apt install debhelper
+        sudo apt install debhelper -y
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         ./dev-make kernel-package
