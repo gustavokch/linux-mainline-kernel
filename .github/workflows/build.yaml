@@ -1,7 +1,7 @@
 on: [push]
 
 env:
-  RELEASE_START: 1150 # 1150, as this is latest build by GitLab CI
+  RELEASE_START: 1160 # 1150, as this is latest build by GitLab CI
   CCACHE_DIR: $RUNNER_TEMP/ccache
 
 jobs:
