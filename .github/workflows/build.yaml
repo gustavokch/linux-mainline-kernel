@@ -43,6 +43,7 @@ jobs:
     - name: Release package
       env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         export RELEASE_NAME="$(./dev-make version)"
@@ -53,6 +54,7 @@ jobs:
         echo $RELEASE
         echo $RELEASE_TITLE
         echo $RELEASE_NAME
+        echo $GH_TOKEN > token
         gh auth login --with-token < token
         gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE $DEB
     
