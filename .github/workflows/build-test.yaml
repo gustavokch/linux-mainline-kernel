@@ -30,8 +30,6 @@ jobs:
     - name: Build package
       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
-        ./dev-make kernel-package
-        
     - name: Release package
       env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
