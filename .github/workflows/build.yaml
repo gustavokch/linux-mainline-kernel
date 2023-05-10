@@ -43,18 +43,20 @@ jobs:
     - name: Release package
       env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
+       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         export RELEASE_NAME="$(./dev-make version)"
         export RELEASE_TITLE="$(./dev-make version)"
         export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
         find / -type f -name "*.deb" > deb
         export DEB=$(cat deb)
+        export GH_TOKEN=$GITHUB_TOKEN
         echo $RELEASE
         echo $RELEASE_TITLE
         echo $RELEASE_NAME
-        echo $GH_TOKEN > token
+        export TOKEN=$GH_TOKEN
+        echo $TOKEN > token
+        export $GH_TOKEN=
         gh auth login --with-token < token
         gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE $DEB
     
