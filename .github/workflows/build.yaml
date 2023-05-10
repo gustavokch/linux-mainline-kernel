@@ -37,13 +37,8 @@ jobs:
       name: Upload Artifact
       with:
         name: .deb files
-        path: ./*.deb        
-    - uses: actions/upload-artifact@v3
-      name: Upload Artifact2
-      with:
-        name: .deb files
-        path: ../*.deb
-       
+        path: /*.deb        
+        
     - name: Release package
       env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
