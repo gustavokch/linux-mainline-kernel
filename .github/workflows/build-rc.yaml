@@ -1,7 +1,7 @@
 on:
   push:
     branches: 
-      - 'release-6.3'
+      - 'v6.4-rc6'
          
 env:
   RELEASE_START: 1220 # 1150, as this is latest build by GitLab CI
