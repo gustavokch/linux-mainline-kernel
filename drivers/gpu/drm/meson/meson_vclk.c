@@ -357,8 +357,6 @@ enum {
 	MESON_VCLK_HDMI_594000,
 /* 2970 /1 /1 /1 /5 /1  => /1 /2 */
 	MESON_VCLK_HDMI_594000_YUV420,
-/* 4830 /2 /1 /2 /5 /1  => /1 /1 */
-	MESON_VCLK_HDMI_241500,
 };
 
 struct meson_vclk_params {
@@ -466,18 +464,6 @@ struct meson_vclk_params {
 		.pll_od1 = 2,
 		.pll_od2 = 1,
 		.pll_od3 = 1,
-		.vid_pll_div = VID_PLL_DIV_5,
-		.vclk_div = 1,
-	},
-	[MESON_VCLK_HDMI_241500] = {
-		.pll_freq = 4830000,
-		.phy_freq = 2415000,
-		.venc_freq = 241500,
-		.vclk_freq = 241500,
-		.pixel_freq = 241500,
-		.pll_od1 = 2,
-		.pll_od2 = 1,
-		.pll_od3 = 2,
 		.vid_pll_div = VID_PLL_DIV_5,
 		.vclk_div = 1,
 	},
@@ -886,10 +872,6 @@ static void meson_vclk_set(struct meson_drm *priv, unsigned int pll_base_freq,
 		case 5940000:
 			m = 0xf7;
 			frac = vic_alternate_clock ? 0x8148 : 0x10000;
-			break;
-		case 4830000:
-			m = 0xc9;
-			frac = 0xd560;
 			break;
 		}
 

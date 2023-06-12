@@ -103,6 +103,7 @@ modules.order
 !.get_maintainer.ignore
 !.gitattributes
 !.gitignore
+!.kunitconfig
 !.mailmap
 !.rustfmt.toml
 
@@ -173,6 +174,3 @@ sphinx_*/
 
 # Rust analyzer configuration
 /rust-project.json
-
-# dev.mk
-/out/

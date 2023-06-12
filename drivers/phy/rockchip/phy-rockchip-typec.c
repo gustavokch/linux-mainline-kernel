@@ -40,7 +40,6 @@
 #include <linux/clk-provider.h>
 #include <linux/delay.h>
 #include <linux/extcon.h>
-#include <linux/extcon-provider.h>
 #include <linux/io.h>
 #include <linux/iopoll.h>
 #include <linux/kernel.h>
@@ -1158,22 +1157,6 @@ static int rockchip_typec_phy_probe(struct platform_device *pdev)
 				dev_err(dev, "Invalid or missing extcon\n");
 			return PTR_ERR(tcphy->extcon);
 		}
-	} else {
-		extcon_set_property_capability(tcphy->extcon, EXTCON_USB,
-					       EXTCON_PROP_USB_SS);
-		extcon_set_property_capability(tcphy->extcon, EXTCON_USB_HOST,
-					       EXTCON_PROP_USB_SS);
-		extcon_set_property_capability(tcphy->extcon, EXTCON_DISP_DP,
-					       EXTCON_PROP_USB_SS);
-		extcon_set_property_capability(tcphy->extcon, EXTCON_USB,
-					       EXTCON_PROP_USB_TYPEC_POLARITY);
-		extcon_set_property_capability(tcphy->extcon, EXTCON_USB_HOST,
-					       EXTCON_PROP_USB_TYPEC_POLARITY);
-		extcon_set_property_capability(tcphy->extcon, EXTCON_DISP_DP,
-					       EXTCON_PROP_USB_TYPEC_POLARITY);
-		extcon_sync(tcphy->extcon, EXTCON_USB);
-		extcon_sync(tcphy->extcon, EXTCON_USB_HOST);
-		extcon_sync(tcphy->extcon, EXTCON_DISP_DP);
 	}
 
 	pm_runtime_enable(dev);
@@ -1211,11 +1194,9 @@ static int rockchip_typec_phy_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int rockchip_typec_phy_remove(struct platform_device *pdev)
+static void rockchip_typec_phy_remove(struct platform_device *pdev)
 {
 	pm_runtime_disable(&pdev->dev);
-
-	return 0;
 }
 
 static const struct of_device_id rockchip_typec_phy_dt_ids[] = {
@@ -1230,7 +1211,7 @@ MODULE_DEVICE_TABLE(of, rockchip_typec_phy_dt_ids);
 
 static struct platform_driver rockchip_typec_phy_driver = {
 	.probe		= rockchip_typec_phy_probe,
-	.remove		= rockchip_typec_phy_remove,
+	.remove_new	= rockchip_typec_phy_remove,
 	.driver		= {
 		.name	= "rockchip-typec-phy",
 		.of_match_table = rockchip_typec_phy_dt_ids,

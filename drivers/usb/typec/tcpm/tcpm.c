@@ -737,7 +737,7 @@ static void tcpm_log_source_caps(struct tcpm_port *port)
 
 static int tcpm_debug_show(struct seq_file *s, void *v)
 {
-	struct tcpm_port *port = (struct tcpm_port *)s->private;
+	struct tcpm_port *port = s->private;
 	int tail;
 
 	mutex_lock(&port->logbuffer_lock);
@@ -1523,7 +1523,21 @@ static bool svdm_consume_svids(struct tcpm_port *port, const u32 *p, int cnt)
 		pmdata->svids[pmdata->nsvids++] = svid;
 		tcpm_log(port, "SVID %d: 0x%x", pmdata->nsvids, svid);
 	}
-	return true;
+
+	/*
+	 * PD3.0 Spec 6.4.4.3.2: The SVIDs are returned 2 per VDO (see Table
+	 * 6-43), and can be returned maximum 6 VDOs per response (see Figure
+	 * 6-19). If the Respondersupports 12 or more SVID then the Discover
+	 * SVIDs Command Shall be executed multiple times until a Discover
+	 * SVIDs VDO is returned ending either with a SVID value of 0x0000 in
+	 * the last part of the last VDO or with a VDO containing two SVIDs
+	 * with values of 0x0000.
+	 *
+	 * However, some odd dockers support SVIDs less than 12 but without
+	 * 0x0000 in the last VDO, so we need to break the Discover SVIDs
+	 * request and return false here.
+	 */
+	return cnt == 7;
 abort:
 	tcpm_log(port, "SVID_DISCOVERY_MAX(%d) too low!", SVID_DISCOVERY_MAX);
 	return false;
@@ -1703,7 +1717,6 @@ static int tcpm_pd_svdm(struct tcpm_port *port, struct typec_altmode *adev,
 			modep->svid_index++;
 			if (modep->svid_index < modep->nsvids) {
 				u16 svid = modep->svids[modep->svid_index];
-				tcpm_log(port, "More modes available, sending discover");
 				response[0] = VDO(svid, 1, svdm_version, CMD_DISCOVER_MODES);
 				rlen = 1;
 			} else {
@@ -6123,60 +6136,6 @@ err_unregister:
 	return ret;
 }
 
-static int tcpm_fw_get_caps_late(struct tcpm_port *port,
-			    struct fwnode_handle *fwnode)
-{
-	int ret, i;
-	ret = fwnode_property_count_u32(fwnode, "typec-altmodes");
-	if (ret > 0) {
-		u32 *props;
-		if (ret % 4) {
-			dev_err(port->dev, "Length of typec altmode array must be divisible by 4");
-			return -EINVAL;
-		}
-
-		props = devm_kzalloc(port->dev, sizeof(u32) * ret, GFP_KERNEL);
-		if (!props) {
-			dev_err(port->dev, "Failed to allocate memory for altmode properties");
-			return -ENOMEM;
-		}
-
-		if(fwnode_property_read_u32_array(fwnode, "typec-altmodes", props, ret) < 0) {
-			dev_err(port->dev, "Failed to read altmodes from port");
-			return -EINVAL;
-		}
-
-		i = 0;
-		while (ret > 0 && i < ARRAY_SIZE(port->port_altmode)) {
-			struct typec_altmode *alt;
-			struct typec_altmode_desc alt_desc = {
-				.svid = props[i * 4],
-				.mode = props[i * 4 + 1],
-				.vdo  = props[i * 4 + 2],
-				.roles = props[i * 4 + 3],
-			};
-
-
-			tcpm_log(port, "Adding altmode SVID: 0x%04x, mode: %d, vdo: %u, role: %d",
-				alt_desc.svid, alt_desc.mode, alt_desc.vdo, alt_desc.roles);
-			alt = typec_port_register_altmode(port->typec_port,
-							  &alt_desc);
-			if (IS_ERR(alt)) {
-				tcpm_log(port,
-					 "%s: failed to register port alternate mode 0x%x",
-					 dev_name(port->dev), alt_desc.svid);
-				break;
-			}
-			typec_altmode_set_drvdata(alt, port);
-			alt->ops = &tcpm_altmode_ops;
-			port->port_altmode[i] = alt;
-			i++;
-			ret -= 4;
-		}
-	}
-	return 0;
-}
-
 static int tcpm_fw_get_caps(struct tcpm_port *port,
 			    struct fwnode_handle *fwnode)
 {
@@ -6632,6 +6591,8 @@ struct tcpm_port *tcpm_register_port(struct device *dev, struct tcpc_dev *tcpc)
 	port->port_type = port->typec_caps.type;
 
 	port->role_sw = usb_role_switch_get(port->dev);
+	if (!port->role_sw)
+		port->role_sw = fwnode_usb_role_switch_get(tcpc->fwnode);
 	if (IS_ERR(port->role_sw)) {
 		err = PTR_ERR(port->role_sw);
 		goto out_destroy_wq;
@@ -6658,12 +6619,6 @@ struct tcpm_port *tcpm_register_port(struct device *dev, struct tcpc_dev *tcpc)
 				     &tcpm_altmode_ops, port,
 				     port->port_altmode, ALTMODE_DISCOVERY_MAX);
 	port->registered = true;
-
-	err = tcpm_fw_get_caps_late(port, tcpc->fwnode);
-	if (err < 0) {
-		dev_err(dev, "Failed to get altmodes from fwnode");
-		goto out_destroy_wq;
-	}
 
 	mutex_lock(&port->lock);
 	tcpm_init(port);

@@ -42,11 +42,6 @@
 		};
 	};
 
-	aliases {
-		// This allows setting ethaddr from u-boot command line
-		ethernet0 = &emac;
-	};
-
 	cpus {
 		#address-cells = <1>;
 		#size-cells = <0>;
