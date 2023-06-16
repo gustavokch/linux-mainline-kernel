@@ -56,8 +56,7 @@ jobs:
     - uses: actions/upload-artifact@v3
       name: Upload Artifact
       with:
-        name: .zip files
-        run: export RELEASE_NAME="$(./dev-make version)"
+        name: $RELEASE_NAME.zip
         path: ./$RELEASE_NAME.zip
         
 
