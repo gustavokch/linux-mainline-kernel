@@ -47,7 +47,7 @@ jobs:
         export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
         find / -type f -name "*.deb" > deb
         export DEB=$(cat deb)
-        zip $RELEASE_NAME.zip -@ < deb
+        zip ../$RELEASE_NAME.zip -@ < deb
         echo $RELEASE
         echo $RELEASE_TITLE
         echo $RELEASE_NAME
