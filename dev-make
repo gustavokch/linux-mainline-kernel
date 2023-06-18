@@ -1,3 +1,4 @@
 #!/bin/bash
-
-exec make -f dev.mk "$@"
+export CCACHE_DIR=/tmp/ccache
+exec ccache -M 14G -F 0 -d /tmp/ccache
+exec CCACHE_DIR=/tmp/ccache make -f dev.mk "$@"
