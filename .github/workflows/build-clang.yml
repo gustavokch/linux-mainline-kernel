@@ -33,6 +33,7 @@ jobs:
       run: |
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
+        sudo apt install -y debhelper
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         ./dev-make kernel-package
         export RELEASE_NAME="$(./dev-make version)"
