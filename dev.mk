@@ -10,6 +10,7 @@ KERNEL_MAKE ?= make \
 	LLVM=1 \
 	LLVM_IAS=1 \
 	HOSTCC=clang \
+	CC=ccache clang \
 	DEB_HOST_GNU_TYPE=aarch64-unknown-linux-gnu \
 	DEB_HOST_MULTIARCH=aarch64-unknown-linux-gnu \
 	CROSS_COMPILE="ccache aarch64-unknown-linux-gnu-"
