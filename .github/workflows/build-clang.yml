@@ -1,0 +1,63 @@
+on:
+  push:
+    branches: 
+      - 'v6.4-rc6-clang-lto'
+         
+env:
+  RELEASE_START: 1280 # 1150, as this is latest build by GitLab CI
+  CCACHE_DIR: $RUNNER_TEMP/ccache
+
+jobs:
+  build:
+    runs-on: self-hosted
+    permissions: write-all
+    container: 
+      image: gustavokch/rock64-release:arm64
+      credentials:
+        username: gustavokch
+        password: dckr_pat_HzZm-FaY8cD_h88RZoEfhWTyC9A
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install Docker binary
+      run: |
+        apt-get -y update
+        apt-get -y install docker.io
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Reset ccache statistics
+      run: ccache -M 0 -F 0
+    - name: Build package
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
+      run: |
+        type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+        && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+        && sudo apt update \
+        && sudo apt install gh -y
+        sudo apt install debhelper zip -y
+        git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
+        git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
+        export RELEASE=$(($RELEASE_START+"-clang))
+        ./dev-make kernel-package
+        export RELEASE_NAME="$(./dev-make version)"
+        export RELEASE_TITLE="$(./dev-make version)"
+        export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        find / -type f -name "*.deb" > deb
+        export DEB=$(cat deb)
+        zip ../$RELEASE_NAME.zip -@ < deb
+        echo $RELEASE
+        echo $RELEASE_TITLE
+        echo $RELEASE_NAME
+        gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE $DEB
+        
+    - uses: actions/upload-artifact@v3
+      name: Upload Artifact
+      with:
+        name: $RELEASE_NAME.zip
+        path: ./$RELEASE_NAME.zip
+        
+
+    
