@@ -5,7 +5,7 @@ on:
          
 env:
   RELEASE_START: 1280 # 1150, as this is latest build by GitLab CI
-  CCACHE_DIR: $RUNNER_TEMP/ccache
+  CCACHE_DIR: /tmp/ccache
 
 jobs:
   build:
@@ -16,6 +16,8 @@ jobs:
       credentials:
         username: gustavokch
         password: dckr_pat_HzZm-FaY8cD_h88RZoEfhWTyC9A
+      volumes:
+        - /tmp/ccache:/tmp/ccache
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -26,14 +28,13 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Reset ccache statistics
-      run: ccache -M 0 -F 0
+      run: ccache -M 14G -F 0 -d /tmp/ccache
     - name: Build package
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
       run: |
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
-        sudo apt install -y debhelper
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         DEB_HOST_GNU_TYPE=aarch64-unknown-linux-gnu ./dev-make kernel-package
         export RELEASE_NAME="$(./dev-make version)"
