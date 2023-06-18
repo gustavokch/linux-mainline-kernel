@@ -32,7 +32,7 @@ info: .config .scmversion
 .PHONY: kernel-menuconfig
 kernel-menuconfig:
 	$(KERNEL_MAKE) $(KERNEL_DEFCONFIG)
-	$(KERNEL_MAKE) HOSTCC=gcc menuconfig
+	$(KERNEL_MAKE) HOSTCC=clang menuconfig
 	$(KERNEL_MAKE) savedefconfig
 	mv defconfig arch/arm64/configs/$(KERNEL_DEFCONFIG)
 
