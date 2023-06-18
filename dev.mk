@@ -5,7 +5,8 @@ KERNEL_VERSION ?= $(shell $(KERNEL_MAKE) -s kernelversion)
 KERNEL_RELEASE ?= $(shell $(KERNEL_MAKE) -s kernelrelease)
 KDEB_PKGVERSION ?= $(KERNEL_VERSION)-$(RELEASE)-ayufan
 
-KERNEL_MAKE ?= ccache -M 14G -F 0 -d /tmp/ccache && PATH="/usr/lib/ccache:${PATH}" make \
+KERNEL_MAKE ?= make \
+	PATH="/usr/lib/ccache:${PATH}" \
 	LLVM=1 \
 	LLVM_IAS=1 \
 	HOSTCC=clang \
