@@ -5,8 +5,12 @@ KERNEL_VERSION ?= $(shell $(KERNEL_MAKE) -s kernelversion)
 KERNEL_RELEASE ?= $(shell $(KERNEL_MAKE) -s kernelrelease)
 KDEB_PKGVERSION ?= $(KERNEL_VERSION)-$(RELEASE)-ayufan
 
-KERNEL_MAKE ?= LLVM=1 LLVM_IAS=1 make \
-	ARCH=arm64
+KERNEL_MAKE ?= make \
+	ARCH=arm64 \
+	LLVM=1 \
+	LLVM_IAS=1 \
+	HOSTCC=clang \
+	CROSS_COMPILE="aarch64-linux-gnu-"
 
 .config: arch/arm64/configs/$(KERNEL_DEFCONFIG)
 	$(KERNEL_MAKE) $(KERNEL_DEFCONFIG)
