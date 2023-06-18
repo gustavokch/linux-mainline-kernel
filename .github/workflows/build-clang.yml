@@ -41,7 +41,7 @@ jobs:
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
-        DEB_HOST_GNU_TYPE=aarch64-unknown-linux-gnu ./dev-make kernel-package
+        PATH="/usr/lib/ccache/bin/:$PATH" CCACHE_DIR="/tmp/ccache" DEB_HOST_GNU_TYPE=aarch64-unknown-linux-gnu ./dev-make kernel-package
         export RELEASE_NAME="$(./dev-make version)"
         export RELEASE_TITLE="$(./dev-make version)"
         export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
