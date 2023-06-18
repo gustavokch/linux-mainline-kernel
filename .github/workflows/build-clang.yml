@@ -5,8 +5,7 @@ on:
          
 env:
   RELEASE_START: 1280 # 1150, as this is latest build by GitLab CI
-  CCACHE_DIR: /tmp/ccache
-
+  
 jobs:
   build:
     runs-on: self-hosted
@@ -28,7 +27,9 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Reset ccache statistics
-      run: ccache -M 14G -F 0 -d /tmp/ccache
+      run: | 
+        export CCACHE_DIR=/tmp/ccache
+        ccache -M 14G -F 0 -d /tmp/ccache
     - name: Build package
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
