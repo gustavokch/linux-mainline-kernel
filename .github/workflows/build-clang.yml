@@ -32,8 +32,10 @@ jobs:
         ccache -M 14G -F 0 -d /tmp/ccache
     - name: Build package
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
-      run: |
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CCACHE_DIR: "/tmp/ccache"
+      run: | 
+        ccache -M 14G -F 0 -d /tmp/ccache
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
