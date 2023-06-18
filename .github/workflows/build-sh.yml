@@ -31,13 +31,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
       run: |
-        type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
-        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-        && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-        && sudo apt update \
-        && sudo apt install gh -y
-        sudo apt install debhelper zip -y
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
@@ -47,7 +40,7 @@ jobs:
         export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
         find / -type f -name "*.deb" > deb
         export DEB=$(cat deb)
-        zip ../$RELEASE_NAME.zip -@ < deb
+        zip ../release.zip -@ < deb
         echo $RELEASE
         echo $RELEASE_TITLE
         echo $RELEASE_NAME
