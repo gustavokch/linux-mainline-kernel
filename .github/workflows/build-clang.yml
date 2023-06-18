@@ -35,6 +35,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CCACHE_DIR: "/tmp/ccache"
       run: | 
+        export PATH="/usr/lib/ccache/bin/:$PATH"
         ccache -M 14G -F 0 -d /tmp/ccache -s -v
         ccache --set-config=max_size=14.0G
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
