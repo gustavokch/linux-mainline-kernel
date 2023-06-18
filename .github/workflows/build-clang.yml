@@ -49,13 +49,13 @@ jobs:
     - uses: actions/upload-artifact@v3
       name: Upload Artifact
       with:
-        name: $RELEASE_NAME.zip
-        path: ./$RELEASE_NAME.zip
+        name: release.zip
+        path: ./release.zip
     - uses: actions/upload-artifact@v3
       name: Upload Artifact
       with:
-        name: $RELEASE_NAME.zip
-        path: ./$RELEASE_NAME.zip
+        name: release.zip
+        path: ../release.zip
         
 
     
