@@ -40,7 +40,8 @@ jobs:
         sudo apt install debhelper zip -y
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
-        export RELEASE=$(($RELEASE_START+"-clang))
+        export CLANG="-clang"
+        export RELEASE=$(($RELEASE_START+$CLANG))
         ./dev-make kernel-package
         export RELEASE_NAME="$(./dev-make version)"
         export RELEASE_TITLE="$(./dev-make version)"
