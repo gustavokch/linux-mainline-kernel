@@ -9,10 +9,10 @@ KERNEL_MAKE ?= make \
 	PATH="/usr/lib/ccache:${PATH}" \
 	LLVM=1 \
 	LLVM_IAS=1 \
-	HOSTCC=clang \
-	CCACHE_DIR=/tmp/ccache \
-	DEB_HOST_GNU_TYPE=aarch64-unknown-linux-gnu \
-	DEB_HOST_MULTIARCH=aarch64-unknown-linux-gnu \
+	HOSTCC="ccache clang" \
+	CCACHE_DIR="/tmp/ccache" \
+	DEB_HOST_GNU_TYPE="aarch64-unknown-linux-gnu" \
+	DEB_HOST_MULTIARCH="aarch64-unknown-linux-gnu" \
 	CROSS_COMPILE="ccache aarch64-unknown-linux-gnu-"
 		
 .config: arch/arm64/configs/$(KERNEL_DEFCONFIG)
