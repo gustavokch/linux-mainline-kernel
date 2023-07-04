@@ -12,7 +12,7 @@ jobs:
     runs-on: self-hosted
     permissions: write-all
     container: 
-      image: gustavokch/rock64build-release:latest
+      image: gustavokch/rock64build-release:arm64
       credentials:
         username: gustavokch
         password: dckr_pat_HzZm-FaY8cD_h88RZoEfhWTyC9A
