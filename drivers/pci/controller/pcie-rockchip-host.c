@@ -24,6 +24,7 @@
 #include <linux/kernel.h>
 #include <linux/mfd/syscon.h>
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/of_pci.h>
@@ -37,6 +38,9 @@
 
 #include "../pci.h"
 #include "pcie-rockchip.h"
+
+static int bus_scan_delay = -1;
+module_param_named(pcie_rk_bus_scan_delay, bus_scan_delay, int, S_IRUGO);
 
 static void rockchip_pcie_enable_bw_int(struct rockchip_pcie *rockchip)
 {
@@ -932,9 +936,39 @@ static int rockchip_pcie_probe(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct pci_host_bridge *bridge;
 	int err;
+	u32 delay = 0;
 
 	if (!dev->of_node)
 		return -ENODEV;
+
+	/*
+	 * Most rk3399 DTs are missing the 'device_type = "pci"' property,
+	 * potentially leading to PCIe probing failure. Be kind to the
+	 * users and fix it up for them. Upgrading is recommended.
+	 */
+	if (!of_find_property(dev->of_node, "device_type", NULL)) {
+		const char dtype[] = "pci";
+		struct property *prop;
+
+		dev_warn(dev, "Working around missing device_type property\n");
+
+		prop = kzalloc(sizeof(*prop), GFP_KERNEL);
+		if (!prop)
+			return -ENOMEM;
+
+		prop->name	= kstrdup("device_type", GFP_KERNEL);
+		prop->value	= kstrdup(dtype, GFP_KERNEL);
+		prop->length	= ARRAY_SIZE(dtype);
+		if (!prop->name || !prop->value) {
+			kfree(prop->name);
+			kfree(prop->value);
+			kfree(prop);
+			return -ENOMEM;
+		}
+
+		if (of_add_property(dev->of_node, prop))
+			dev_warn(dev, "Failed to add property, probing may fail");
+	}
 
 	bridge = devm_pci_alloc_host_bridge(dev, sizeof(*rockchip));
 	if (!bridge)
@@ -986,6 +1020,18 @@ static int rockchip_pcie_probe(struct platform_device *pdev)
 		goto err_remove_irq_domain;
 
 	rockchip_pcie_enable_interrupts(rockchip);
+
+	/* Prefer command-line param over device tree */
+	if (bus_scan_delay > 0) {
+		delay = bus_scan_delay;
+		dev_info(dev, "wait %u ms (from command-line) before bus scan\n", delay);
+	} else if (rockchip->bus_scan_delay > 0 && bus_scan_delay < 0) {
+		delay = rockchip->bus_scan_delay;
+		dev_info(dev, "wait %u ms (from device tree) before bus scan\n", delay);
+	}
+	if (delay > 0) {
+		msleep(delay);
+	}
 
 	err = pci_host_probe(bridge);
 	if (err < 0)
