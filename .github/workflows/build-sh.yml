@@ -4,7 +4,7 @@ on:
       - 'release-6.4'
          
 env:
-  RELEASE_START: 1360 # 1150, as this is latest build by GitLab CI
+  RELEASE_START: 1375 # 1150, as this is latest build by GitLab CI
   CCACHE_DIR: $RUNNER_TEMP/ccache
 
 jobs:
