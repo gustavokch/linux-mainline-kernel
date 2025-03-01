@@ -4,7 +4,7 @@ on:
       - 'release-6.4'
          
 env:
-  RELEASE_START: 1350 # 1150, as this is latest build by GitLab CI
+  RELEASE_START: 1500 # 1150, as this is latest build by GitLab CI
   CCACHE_DIR: $RUNNER_TEMP/ccache
 
 jobs:
@@ -17,16 +17,20 @@ jobs:
         username: gustavokch
         password: dckr_pat_HzZm-FaY8cD_h88RZoEfhWTyC9A
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Install Docker binary
       run: |
         apt-get -y update
         apt-get -y install docker.io
+
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
+
     - name: Reset ccache statistics
       run: ccache -M 0 -F 0
+
     - name: Build package
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
@@ -45,12 +49,9 @@ jobs:
         echo $RELEASE_TITLE
         echo $RELEASE_NAME
         gh release create --title $RELEASE_TITLE --generate-notes -R https://github.com/gustavokch/linux-mainline-kernel $RELEASE $DEB
-        
-    - uses: actions/upload-artifact@v3
-      name: Upload Artifact
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
       with:
         name: .deb files
         path: ./*.deb
-        
-
-    
