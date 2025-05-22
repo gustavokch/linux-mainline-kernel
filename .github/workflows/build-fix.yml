@@ -19,21 +19,22 @@ jobs:
     - name: Install Build Dependencies
       run: |
         apt-get update
-        apt-get install -y \
-          docker.io \
-          libssl-dev \
-          lsb-release \
-          fakeroot \
-          bc \
-          kmod \
-          cpio \
-          flex \
-          bison \
-          libelf-dev \
-          build-essential \
-          dwarves \
-          rsync \
-          ccache
+        DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        docker.io \
+        libssl-dev \
+        lsb-release \
+        fakeroot \
+        bc \
+        kmod \
+        cpio \
+        flex \
+        bison \
+        libelf-dev \
+        build-essential \
+        dwarves \
+        rsync \
+        ccache \
+        dpkg-dev
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -50,6 +51,7 @@ jobs:
       run: |
         export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
         export KDEB_CHANGELOG_DIST=bookworm
+        sudo apt-get update && apt-get install -y libssl-dev
         ./dev-make kernel-package
 
     - name: Release package
