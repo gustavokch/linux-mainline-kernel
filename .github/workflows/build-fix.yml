@@ -1,0 +1,98 @@
+on:
+  push:
+    branches: 
+      - 'release-6.13'
+         
+env:
+  RELEASE_START: 1900
+  CCACHE_DIR: $RUNNER_TEMP/ccache
+
+jobs:
+  build:
+    runs-on: self-hosted
+    permissions: write-all
+    container: ayufan/rock64-dockerfiles:bookworm
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install Build Dependencies
+      run: |
+        apt-get update
+        apt-get install -y \
+          docker.io \
+          libssl-dev \
+          lsb-release \
+          fakeroot \
+          bc \
+          kmod \
+          cpio \
+          flex \
+          bison \
+          libelf-dev \
+          build-essential \
+          dwarves \
+          rsync \
+          ccache
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Configure ccache
+      run: |
+        echo "CCACHE_DIR=$RUNNER_TEMP/ccache" >> $GITHUB_ENV
+        echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+
+    - name: Reset ccache statistics
+      run: ccache -M 0 -F 0
+
+    - name: Build package
+      run: |
+        export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
+        export KDEB_CHANGELOG_DIST=bookworm
+        ./dev-make kernel-package
+
+    - name: Release package
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set -x
+        export RELEASE=$(($RELEASE_START+$GITHUB_RUN_NUMBER))
+        export RELEASE_NAME="$(./dev-make version)"
+        export RELEASE_TITLE="$(./dev-make version)"
+        export DESCRIPTION="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+        github-release release \
+          --tag "${RELEASE_NAME}" \
+          --name "${RELEASE_TITLE}" \
+          --user "${GITHUB_REPOSITORY%/*}" \
+          --repo "${GITHUB_REPOSITORY#*/}" \
+          --description "${DESCRIPTION}" \
+          --target "${GITHUB_SHA}" \
+          --draft
+
+        sleep 3s # allow to update release
+
+        for i in ../*$(./dev-make info)*.deb; do
+          github-release upload \
+            --tag "${RELEASE_NAME}" \
+            --name "$(basename "${i}")" \
+            --user "${GITHUB_REPOSITORY%/*}" \
+            --repo "${GITHUB_REPOSITORY#*/}" \
+            --file "${i}"
+        done
+
+        github-release edit \
+          --tag "${RELEASE_NAME}" \
+          --name "${RELEASE_TITLE}" \
+          --user "${GITHUB_REPOSITORY%/*}" \
+          --repo "${GITHUB_REPOSITORY#*/}" \
+          --description "${DESCRIPTION}"
+
+        rm ../*$(./dev-make info)*.deb
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: .deb files
+        path: ./*.deb
