@@ -5,8 +5,8 @@ env:
 
 jobs:
   build:
-    runs-on: [self-hosted, Linux, ARM64]
-    container: ayufan/rock64-dockerfiles:bookworm
+    runs-on: [self-hosted]
+    container: gustavokch/rock64build-release:latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
