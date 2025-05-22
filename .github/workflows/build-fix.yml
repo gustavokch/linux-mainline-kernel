@@ -35,6 +35,27 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
       run: |
+    - name: Install build dependencies
+      run: |
+        sudo dpkg --add-architecture arm64
+        sudo apt-get update
+        sudo apt dist-upgrade -y
+        # Core build tools
+        sudo apt-get install -y \
+          build-essential \
+          devscripts \
+          ccache \
+          lsb-release \
+          fakeroot \
+          rsync \
+          bc \
+          flex \
+          bison \
+          libssl-dev \
+          libelf-dev
+    
+        # Optional: multiarch targets (some builds require these explicitly)
+        sudo apt-get install -y libssl-dev:arm64 libelf-dev:arm64
         sudo apt install debhelper -y
         git config --global --add safe.directory "/__w/linux-mainline-kernel/linux-mainline-kernel"
         git config --global --add safe.directory "/__w/linux-rockchip/linux-rockchip"        
