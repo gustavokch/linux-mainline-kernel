@@ -1,16 +1,11 @@
-on:
-  push:
-    branches: 
-      - 'release-6.13'
-         
+on: [push]
+
 env:
-  RELEASE_START: 1900 # 1150, as this is latest build by GitLab CI
-  CCACHE_DIR: $RUNNER_TEMP/ccache
+  RELEASE_START: 1700 # 1150, as this is latest build by GitLab CI
 
 jobs:
   build:
-    runs-on: self-hosted
-    permissions: write-all
+    runs-on: [self-hosted, Linux, ARM64]
     container: ayufan/rock64-dockerfiles:bookworm
     steps:
     - name: Checkout
@@ -70,9 +65,3 @@ jobs:
           --description "${DESCRIPTION}"
 
         rm ../*$(./dev-make info)*.deb
-        
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: .deb files
-        path: ./*.deb
